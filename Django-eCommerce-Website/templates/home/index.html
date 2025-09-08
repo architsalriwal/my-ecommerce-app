@@ -1,0 +1,133 @@
+{# Extend base template and start content block #}
+{% extends "base/base.html"%} {% block start %}
+
+{# CSS styles section #}
+<style>
+  /* Add bottom margin to filter section */
+  .filter-section {
+      margin-bottom: 20px;
+  }
+
+  /* Add bottom margin to form groups */
+  .form-group {
+      margin-bottom: 10px;
+  }
+
+  /* Define animation keyframes for card appearance */
+  @keyframes appear {
+    from {
+      opacity: 0;
+      scale: 0.5;
+    }
+    to {
+      opacity: 1;
+      scale: 1;
+    }
+  }
+
+  /* Apply animation to cards when they enter viewport */
+  .card {
+    animation: appear linear;
+    animation-timeline: view();
+    animation-range: entry 0% cover 40%;
+  }
+</style>
+
+{# Main container with top margin and padding #}
+<div class="container mt-3 pt-3">
+  {# Include alert messages template #}
+  {% include 'base/alert.html' %}
+
+  {# Filter Section - Contains category and sort dropdowns #}
+  <div class="filter-section mb-3">
+    <form method="GET" class="row">
+      {# Category Filter Dropdown #}
+      <div class="form-group col-md-6">
+        <label for="category">Category:</label>
+        <select id="category" name="category" class="form-control" onchange="this.form.submit()">
+          <option value="">All</option>
+          {# Loop through available categories #}
+          {% for category in categories %}
+          <option value="{{ category.category_name }}" {% if selected_category == category.category_name %} selected {% endif %}>
+            {{ category.category_name }}
+          </option>
+          {% endfor %}
+        </select>
+      </div>
+      
+      {# Sort Options Dropdown #}
+      <div class="form-group col-md-6">
+        <label for="sort">Sort by:</label>
+        <select id="sort" name="sort" class="form-control" onchange="this.form.submit()">
+          <option value="">Select</option>
+          <option value="newest" {% if selected_sort == 'newest' %}selected{% endif %}>Newest</option>
+          <option value="priceAsc" {% if selected_sort == 'priceAsc' %}selected{% endif %}>Price: Low-High</option>
+          <option value="priceDesc" {% if selected_sort == 'priceDesc' %}selected{% endif %}>Price: High-Low</option>
+        </select>
+      </div>
+    </form>
+  </div>
+
+  {# Product Grid Section #}
+  <div class="row">
+    {# Loop through products and display each in a card #}
+    {% for product in products %}
+    <div class="col-md-3">
+      <figure class="card card-product-grid">
+        {# Product Image #}
+        <div class="img-wrap">
+          <img src="/media/{{product.product_images.first.image}}" />
+        </div>
+        {# Product Details #}
+        <figcaption class="info-wrap border-top">
+          <a href="{% url 'get_product' product.slug %}" class="title">
+            <b>{{ product.product_name }}</b></a>
+          <div class="price mt-2">₹{{product.price}}.00</div>
+        </figcaption>
+      </figure>
+    </div>
+    {% endfor %}
+  </div>
+
+  {# Pagination Navigation #}
+  <nav aria-label="Page navigation example">
+    <ul class="pagination justify-content-center mb-4">
+      {# Previous Page Link #}
+      {% if products.has_previous %}
+      <li class="page-item">
+        <a class="page-link" href="?page={{ products.previous_page_number }}" aria-label="Previous">
+          <span aria-hidden="true">&laquo; Previous</span>
+        </a>
+      </li>
+      {% else %}
+      <li class="page-item disabled">
+        <a class="page-link">Previous</a>
+      </li>
+      {% endif %}
+
+      {# Page Numbers #}
+      {% for num in products.paginator.page_range %}
+      <li class="page-item {% if products.number == num %}active{% endif %}">
+        <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+      </li>
+      {% endfor %}
+
+      {# Next Page Link #}
+      {% if products.has_next %}
+      <li class="page-item">
+        <a class="page-link" href="?page={{ products.next_page_number }}" aria-label="Next">
+          <span aria-hidden="true">Next &raquo;</span>
+        </a>
+      </li>
+      {% else %}
+      <li class="page-item disabled">
+        <a class="page-link">Next</a>
+      </li>
+      {% endif %}
+    </ul>
+  </nav>
+  
+</div>
+
+{# End content block #}
+{% endblock %}

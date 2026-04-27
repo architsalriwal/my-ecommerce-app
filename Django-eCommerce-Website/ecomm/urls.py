@@ -1,5 +1,3 @@
-# C:\Users\archi\Downloads\Folder2\Django-eCommerce-Website\ecomm\urls.py
-
 from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings
@@ -16,9 +14,10 @@ from cart import urls as cart_api_urls
 from home import api_urls as home_api_urls
 from home import api_views as home_api_views
 
+
 def get_csrf_token_view(request):
-    """Returns the CSRF token for the current session."""
     return JsonResponse({'csrfToken': get_token(request)})
+
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -35,7 +34,15 @@ urlpatterns = [
     ])),
 ]
 
+
+# ✅ DEBUG TOOLBAR CONFIG
 if settings.DEBUG:
+    import debug_toolbar
+
+    urlpatterns += [
+        path("__debug__/", include(debug_toolbar.urls)),
+    ]
+
     urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
     urlpatterns += staticfiles_urlpatterns()
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

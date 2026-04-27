@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'django.contrib.sites',
     'corsheaders',
+    'debug_toolbar',
 
     'products',
     'accounts',
@@ -93,6 +94,7 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'allauth.account.middleware.AccountMiddleware',
+    'debug_toolbar.middleware.DebugToolbarMiddleware',
 ]
 
 ROOT_URLCONF = 'ecomm.urls'
@@ -263,3 +265,10 @@ LOGGING = {
     },
 }
 ...
+
+DEBUG = True
+
+INTERNAL_IPS = [
+    "127.0.0.1",
+    "localhost",
+]

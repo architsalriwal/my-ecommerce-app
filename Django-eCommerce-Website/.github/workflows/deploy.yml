@@ -1,0 +1,46 @@
+# The name of the automated pipeline
+name: Deploy E-Commerce App to AWS EC2
+
+# 1. THE TRIGGER
+# This tells GitHub Actions: "Only wake up when code is pushed to the 'main' branch."
+on:
+  push:
+    branches: [ "main" ]
+
+# 2. THE JOBS
+# This is the actual work the temporary GitHub robot will do.
+jobs:
+  deploy:
+    # GitHub rents us a temporary Ubuntu server to run this job.
+    runs-on: ubuntu-latest
+
+    steps:
+    # Step A: Download the code from your repository onto the temporary GitHub server.
+    - name: Get Code from GitHub
+      uses: actions/checkout@v3
+
+    # Step B: Securely copy the files from the GitHub server directly to your AWS EC2 server.
+    - name: Copy files to AWS EC2 using SCP
+      uses: appleboy/scp-action@master
+      with:
+        # We use the secrets we hid in the GitHub vault!
+        host: ${{ secrets.EC2_HOST }}
+        username: ${{ secrets.EC2_USERNAME }}
+        key: ${{ secrets.EC2_SSH_KEY }}
+        source: "." # Copy everything in the current folder
+        target: "/home/ubuntu/ecommerce_app" # Put it in this folder on the AWS server
+
+    # Step C: Log into the AWS EC2 server and run the Docker commands.
+    - name: Execute Docker Compose on AWS EC2
+      uses: appleboy/ssh-action@master
+      with:
+        host: ${{ secrets.EC2_HOST }}
+        username: ${{ secrets.EC2_USERNAME }}
+        key: ${{ secrets.EC2_SSH_KEY }}
+        # The 'script' block contains the exact commands the robot will type into your EC2 terminal.
+        script: |
+          # Go to the folder where we just copied the code
+          cd /home/ubuntu/ecommerce_app
+          
+          # Tell Docker to rebuild the app with the new code, and run it in the background (-d)
+          sudo docker-compose up -d --build
